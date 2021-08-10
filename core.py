@@ -42,10 +42,12 @@ def find_max_subsequence(list1: list, list2: list) -> tuple:
 
     return max_sequence
 
+
 # (未实现) 查找最佳子序列
 def find_best_subsequence(list1: list, list2: list) -> tuple:
     subsequences = find_same_subsequences(list1, list2)
     # nope
+
 
 # 计算数据熵（混乱程度）
 def calc_entropy(list: list) -> list:
@@ -55,18 +57,25 @@ def calc_entropy(list: list) -> list:
 # ---------------------------------------
 
 # 计算重合部分差异绝对值之和
-def calc_sum_diff(list1: list, list2: list, shif: int) -> tuple:
+def calc_average_diff(list1: list, list2: list, shift: int) -> tuple:
     sum_diff = 0
-    for j in range(len(list1) - shif, len(list1)):
-        sum_diff += abs(list1[j] - list2[j - shif])
+    for j in range(shift, len(list1)):
+        sum_diff += abs(list1[j] - list2[j - shift])
 
-    return shif, sum_diff
+    return shift, (sum_diff // (len(list1) - shift))
+
 
 # 查找重合位置
-def find_coincide(list1: list, list2: list) -> int:
-    sum_diff = []
+def find_coincide(list1: list, list2: list) -> tuple:
+    sum_diff_list = []
     for i in range(0, len(list1)):
-        sum_diff.append(calc_sum_diff(list1, list2, i))
+        diff = calc_average_diff(list1, list2, i)
+        sum_diff_list.append(diff)
 
-    print(sum_diff)
-    return 0
+    mix_diff = sum_diff_list[0]
+    for diff in sum_diff_list:
+        if diff[1] < mix_diff[1]:
+            mix_diff = diff
+
+    print(mix_diff)
+    return mix_diff[0]
