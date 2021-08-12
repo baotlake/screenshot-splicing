@@ -1,10 +1,10 @@
 #! python3
 
-import os
 import sys
 from PIL import Image
-from image import get_vertical_color
-from core import find_same_subsequences, find_max_subsequence
+from src.image import get_vertical_color
+from src.core import find_coincide
+import time
 
 # This is a sample Python script.
 
@@ -26,11 +26,14 @@ x = 1
 color_list_1 = get_vertical_color(img, x)
 color_list_2 = get_vertical_color(img2, x)
 
-print(find_same_subsequences(color_list_1, color_list_2))
-print(find_max_subsequence(color_list_1, color_list_2))
+# print(find_same_subsequences(color_list_1, color_list_2))
+# print(find_max_subsequence(color_list_1, color_list_2))
 
-i += 1
+t1 = time.time()
+find_coincide(color_list_1, color_list_2)
+t2 = time.time()
 
+print('find_coincide time : ', t2 - t1, t2, t1)
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
