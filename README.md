@@ -2,7 +2,12 @@
 用Python拼接屏幕截图
 
 
-./splicing.py ./img/1/*
 
-./splicing.py ./img/2/*
+## 拼接多张图片
+`./splicing ./img/1/a.png ./img/1/b.png`
+
+`./splicing ./img/1/*`
+
+
+
 
