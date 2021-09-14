@@ -16,5 +16,3 @@
 `./splicing.py ./img/1/*`
 
 
-
-
