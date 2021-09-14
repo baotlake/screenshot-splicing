@@ -2,8 +2,8 @@
 
 import sys
 from PIL import Image
-from src.image import get_vertical_color
-from src.core import find_coincide
+from v1.image import get_vertical_color
+from v1.core import find_coincide
 import time
 
 # This is a sample Python script.
