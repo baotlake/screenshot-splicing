@@ -6,4 +6,6 @@ venv
 **/.DS_Store
 .idea
 **/__pycache__
+
 tmp/**
+!tmp/README.md
