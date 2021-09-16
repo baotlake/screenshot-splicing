@@ -50,26 +50,31 @@ while success:
 
     column2 = sampling(array2[crop_header:-crop_footer, ])
     # print(column, column2)
-
+    # 顺序计算重合度
     # offset_y, diff = translation_y(column, column2)
+    # 计算重合度，由预测值逐渐向两边比较，性能优化
     offset_y, diff = predict_translation_y(column, column2, offset_y)
     print('frame', frame_count, '\toffset', offset_y, '\tdiff', diff)
 
     if offset_y < 0:
-        # 显示接缝
         pass
-        long_image = np.vstack((long_image[: offset_y, ], seam))
+        long_image = np.vstack((long_image[: offset_y, ], seam))  # 显示接缝
         long_image = np.vstack((long_image[: offset_y, ], array[crop_header:crop_header + offset_y, ]))
     else:
-        # 显示接缝
         pass
-        long_image = np.vstack((long_image, seam))
+        long_image = np.vstack((long_image, seam))  # 显示接缝
         long_image = np.vstack((long_image, array[crop_header:crop_header + offset_y, ]))
 
     array = array2
     column = column2
 
-# long_image = np.vstack((long_image, array2[: crop_header, ]))
+if offset_y < 0:
+    long_image = np.vstack((long_image[: offset_y, ], seam))  # 显示接缝
+    long_image = np.vstack((long_image[: offset_y, ], array[crop_header:, ]))
+else:
+    long_image = np.vstack((long_image, seam))  # 显示接缝
+    long_image = np.vstack((long_image, array[crop_header:, ]))
+
 print('❇️  frame:', frame_count)
 
 # cv.VideoCapture().read() BGR
