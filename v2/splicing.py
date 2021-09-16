@@ -5,13 +5,15 @@ import cv2
 import numpy as np
 from PIL import Image
 
+from v2.core import sampling, translation_y, predict_translation_y
+
 if len(sys.argv) < 2:
     print(f'Usage: {sys.argv[0]} video.mp4')
     sys.exit(0)
 
 config = {
-    'header': 0.35,
-    'footer': 0.2,
+    'header': 0.16,
+    'footer': 0.14,
 }
 
 capture = cv2.VideoCapture(sys.argv[1])
@@ -27,52 +29,45 @@ crop_footer = int(size[1] * config['footer'])
 
 long_image = array[0: crop_header, ]
 
+# 接缝 一行红色像素
+seam = np.broadcast_to(np.array([[[0, 0, 255]]], dtype='uint8'), shape=(1, array.shape[1], 3))
+# print('seam shape ', seam.shape)
 
-# 采样函数
-def sampling(array, array2):
-    return (
-        np.dot(array[:, 213, :], [0.2989, 0.5870, 0.1140]),
-        np.dot(array2[:, 213, :], [0.2989, 0.5870, 0.1140])
-    )
+column = sampling(array[crop_header:-crop_footer, ])
+array2 = None
+column2 = None
+offset_y = 0
 
-
-# 计算最佳偏移值
-def translation_y(column, column2):
-    min_diff_y = (
-        0,
-        np.average(np.abs(column - column2))
-    )
-    for i in range(1, column.shape[0] - 90):
-        diff_array = np.abs(column[i:] - column2[:-i])
-        average_diff = np.average(diff_array)
-        # print('diff ', average_diff)
-        if average_diff < 1:
-            # print('break ', i)
-            return i
-        if average_diff < min_diff_y[1]:
-            min_diff_y = (i, average_diff)
-
-    return min_diff_y[0]
-
-
-array2 = np.array([], dtype='uint8')
 frame_count = 1
 while success:
     success, array2 = capture.read()
-    frame_count += 1
-
     if not success:
         break
-    column, column2 = sampling(
-        array[crop_header:-crop_footer, ],
-        array2[crop_header:-crop_footer, ]
-    )
+    frame_count += 1
+
+    # if frame_count % 3 != 0:
+    #     continue
+
+    column2 = sampling(array2[crop_header:-crop_footer, ])
     # print(column, column2)
 
-    offset_y = translation_y(column, column2)
-    print('offset_y: ', offset_y)
-    long_image = np.vstack((long_image, array[crop_header:crop_header + offset_y, ]))
+    # offset_y, diff = translation_y(column, column2)
+    offset_y, diff = predict_translation_y(column, column2, offset_y)
+    print('frame', frame_count, '\toffset', offset_y, '\tdiff', diff)
+
+    if offset_y < 0:
+        # 显示接缝
+        pass
+        long_image = np.vstack((long_image[: offset_y, ], seam))
+        long_image = np.vstack((long_image[: offset_y, ], array[crop_header:crop_header + offset_y, ]))
+    else:
+        # 显示接缝
+        pass
+        long_image = np.vstack((long_image, seam))
+        long_image = np.vstack((long_image, array[crop_header:crop_header + offset_y, ]))
+
     array = array2
+    column = column2
 
 # long_image = np.vstack((long_image, array2[: crop_header, ]))
 print('❇️  frame:', frame_count)
