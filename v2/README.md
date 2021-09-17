@@ -22,6 +22,10 @@ pip install pillow
 
 # openCV 
 conda install opencv
+
+# ffmpeg-python
+pip install ffmpeg-python
+
 ```
 
 opencv依赖众多，pip安装后import导入可能会报错，推荐使用conda安装opencv
