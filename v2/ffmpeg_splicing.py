@@ -5,7 +5,6 @@ import numpy as np
 from PIL import Image
 import ffmpeg
 import time
-
 from core import sampling, predict_translation_y
 
 if len(sys.argv) < 2:
@@ -22,7 +21,6 @@ probe = ffmpeg.probe(sys.argv[1])
 video_info = next(stream for stream in probe['streams'] if stream['codec_type'] == 'video')
 width = int(video_info['width'])
 height = int(video_info['height'])
-num_frames = int(video_info['nb_frames'])
 
 t_1 = time.time()
 out, err = (
@@ -53,9 +51,10 @@ column2 = None
 offset_y = 0
 
 frame_count = 1
+num_frames = video.shape[0]
 
 while frame_count < num_frames:
-    array2 = video[frame_count,]
+    array2 = video[frame_count, ]
     frame_count += 1
 
     column2 = sampling(array2[crop_header:-crop_footer, ])
@@ -68,7 +67,7 @@ while frame_count < num_frames:
         long_image = np.vstack((long_image[: offset_y, ], array[crop_header:crop_header + offset_y, ]))
     else:
         pass
-        long_image = np.vstack((long_image, seam))  # 显示接缝
+        # long_image = np.vstack((long_image, seam))  # 显示接缝
         long_image = np.vstack((long_image, array[crop_header:crop_header + offset_y, ]))
 
     array = array2
@@ -78,7 +77,7 @@ if offset_y < 0:
     # long_image = np.vstack((long_image[: offset_y, ], seam))  # 显示接缝
     long_image = np.vstack((long_image[: offset_y, ], array[crop_header:, ]))
 else:
-    long_image = np.vstack((long_image, seam))  # 显示接缝
+    # long_image = np.vstack((long_image, seam))  # 显示接缝
     long_image = np.vstack((long_image, array[crop_header:, ]))
 
 t_3 = time.time()

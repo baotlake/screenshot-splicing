@@ -32,17 +32,6 @@ def sampling(array):
     return np.dot(array[:, 213, :], [0.2989, 0.5870, 0.1140])
 
 
-def sampling_yuv(array):
-    w = array.shape[1]
-
-    # 16 * 3->3均值
-    return np.vstack((
-        np.average(array[:, np.linspace(20, w / 4, 16, dtype='int'), 0]),
-        np.average(array[:, np.linspace(w / 2, 5 * w / 8, 16, dtype='int'), 0]),
-        np.average(array[:, np.linspace(6 * w / 8, 7 * w / 8, 16, dtype='int'), 0]),
-    )).T
-
-
 # 根据预测值,生成一个最佳的偏移序列
 def better_offset(max, predict_y):
     array_positive = np.arange(1, max + 1, 1)

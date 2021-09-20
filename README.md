@@ -8,6 +8,8 @@
 
 `./splicing ./video/a.mov`
 
+拼接好的长图位于`./tmp/`目录下。
+
 ## 拼接多张图片 v1
 [文档 v1](./v1/README.md)
 
