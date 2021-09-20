@@ -1,9 +1,8 @@
 import numpy as np
-
+import math
 
 def sampling_yuv(array):
     w = array.shape[1]
-
     # 16 * 3->3均值
     return np.vstack((
         np.average(array[:, np.linspace(20, w / 4, 16, dtype='int')], axis=1),
@@ -33,9 +32,6 @@ def better_offset(max, predict_y):
     ravel_2 = array_all[max + predict_y - 1 - ravel_len: max + predict_y - 1] if predict_y >= 0 else \
         array_all[: ravel_len]
 
-    # print('ravel_1 shape', ravel_1.shape, ravel_1)
-    # print('ravel_2 shape', ravel_2.shape, ravel_2)
-
     ravel_o = array_all[:max + predict_y - ravel_len] if predict_y > 0 else array_all[ravel_len * 2:]
 
     return np.hstack((np.vstack([
@@ -56,7 +52,7 @@ def predict_translation_y(column, column2, predict):
     if min_diff[1] < min_avg_diff:
         return min_diff
 
-    max_offset = column.shape[0] - 400
+    max_offset = column.shape[0] - 220
     for i in better_offset(max_offset, predict):
         diff_array = np.abs(column[i:] - column2[:-i]) if i > 0 else np.abs(column[:i] - column2[-i:])
         average_diff = np.average(diff_array)
@@ -72,3 +68,28 @@ def predict_translation_y(column, column2, predict):
                 return min_diff
 
     return min_diff
+
+
+# 计算预测值 (frame_count, offset_y, diff)[]
+def predict(list, idea_offset):
+    if len(list) < 1:
+        return 0, 0
+    elif len(list) == 1:
+        return 0, list[0][1]
+
+    pre_data = list[-2]
+    data = list[-1]
+
+    offset_per_frame = data[1] / (data[0] - pre_data[0])
+    if offset_per_frame == 0:
+        if pre_data[1] == 0:
+            return 3, 0
+        else:
+            return 0, pre_data[1]
+
+    frame_distance = math.floor(idea_offset / abs(offset_per_frame * 1.5))
+    drop_frame = max(min(frame_distance - 1, 3), 0)
+    predict_y = int((drop_frame + 1) * offset_per_frame)
+    return drop_frame, predict_y
+
+

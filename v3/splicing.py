@@ -6,11 +6,12 @@ import ffmpeg
 import numpy as np
 from PIL import Image
 
-from core import sampling_yuv, predict_translation_y
+from core import sampling_yuv, predict_translation_y, predict
 
 config = {
-    'header': 0.16,
-    'footer': 0.14,
+    'header': 0.1,
+    'footer': 0.09,
+    'idea_offset': 0.35,
 }
 
 t_0 = time.time()
@@ -46,8 +47,12 @@ column = sampling_yuv(array[crop_header:-crop_footer, ])
 # print('column shape', column.shape)
 column2 = None
 offset_y = 0
-pre_data = (0, 0)  # (offset, frame_diff)
-predict = (0, 0)  # (offset, frame_diff)
+predict_y = 0
+
+drop_frames = 0
+content_height = int(height * (1 - config['header'] - config['footer']))
+idea_offset = content_height * config['idea_offset']
+print('idea_offset ', idea_offset)
 
 result_list = []
 while frame_count < num_frames:
@@ -55,18 +60,18 @@ while frame_count < num_frames:
     frame_count += 1
 
     column2 = sampling_yuv(array2[crop_header:-crop_footer, ])
-    offset_y, diff = predict_translation_y(column, column2, offset_y)
-    print('frame', frame_count, '\toffset', offset_y, '\tdiff', diff)
+    offset_y, diff = predict_translation_y(column, column2, predict_y)
+    print('frame', frame_count, f'+{drop_frames}', '\tpredict', predict_y, '\toffset', offset_y, '\tdiff', diff)
 
     result_list.append((frame_count, offset_y, diff))
     array = array2
     column = column2
     # break
+    drop_frames, predict_y = predict(result_list[-3:], idea_offset)
+    frame_count += drop_frames
 
 t_3 = time.time()
 print('Calc Offset', t_3 - t_2)
-
-content_height = int(height * (1 - config['header'] - config['footer']))
 
 seam = np.broadcast_to(np.array([[[255, 255, 255]]], dtype='uint8'), shape=(1, array.shape[1], 3))
 long_image = np.array([], dtype='uint8').reshape([0, width, 3])
