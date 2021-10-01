@@ -16,6 +16,7 @@ config = {
 
 t_0 = time.time()
 
+# 获取视频的一些信息，width， height
 video_path = sys.argv[1]
 probe = ffmpeg.probe(video_path)
 video_info = next(stream for stream in probe['streams'] if stream['codec_type'] == 'video')
@@ -25,6 +26,7 @@ pixels = height * width * 3
 
 t_1 = time.time()
 
+# 视频读帧
 out, err = (
     ffmpeg
         .input(video_path)
@@ -73,6 +75,7 @@ while frame_count < num_frames:
 t_3 = time.time()
 print('Calc Offset', t_3 - t_2)
 
+# 拼接长图，下面两个for循环都是
 seam = np.broadcast_to(np.array([[[255, 255, 255]]], dtype='uint8'), shape=(1, array.shape[1], 3))
 long_image = np.array([], dtype='uint8').reshape([0, width, 3])
 temp_image = np.dstack((video[0][0], video[0][1], video[0][2]))[0: -crop_footer, ]
