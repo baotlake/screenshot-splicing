@@ -91,5 +91,3 @@ def predict(list, idea_offset):
     drop_frame = max(min(frame_distance - 1, 3), 0)
     predict_y = int((drop_frame + 1) * offset_per_frame)
     return drop_frame, predict_y
-
-
