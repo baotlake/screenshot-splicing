@@ -12,7 +12,7 @@ while success:
     frame_count += 1
 
     # 截帧调试
-    if frame_count in [1840,1841,1832,1831,1721,1720,415,414]:
+    if frame_count in [75, 79, 81, 82]:
         img = Image.fromarray(image[:, :, [2, 1, 0]], 'RGB')
         img.save(f'../tmp/{frame_count}.png')
 
