@@ -33,7 +33,7 @@ def predict_offset(max: int, p: int):
 
 
 # 根据采样计算两张图片的重合位置
-def diff_overlap(cols: np.ndarray, cols2: np.ndarray, predict=0, approx_diff=0.2, min_overlap=220):
+def diff_overlap(cols: np.ndarray, cols2: np.ndarray, predict=0, approx_diff=0.2, min_overlap=100):
     approach_i = 0
     min_diff = (0, 255)
 
@@ -57,7 +57,7 @@ def diff_overlap(cols: np.ndarray, cols2: np.ndarray, predict=0, approx_diff=0.2
 
 
 # 计算预测值 (frame_count, offset_y, diff)[]
-def predict(history: list, idea_offset, max_step=3):
+def predict(history: list, expect_offset, max_step=3):
     if len(history) < 1:
         return 1, 0
     if len(history) == 1:
@@ -73,14 +73,17 @@ def predict(history: list, idea_offset, max_step=3):
         else:
             return 1, pre_data[1]
 
-    frame_distance = math.floor(idea_offset / abs(offset_per_frame * 1.5))
+    frame_distance = math.floor(expect_offset / abs(offset_per_frame * 1.5))
     step = max(min(frame_distance - 1, max_step), 1)
     predict_y = int((step + 1) * offset_per_frame)
     return step, predict_y
 
 
 # 计算视频邻近帧之间的重合位置
-def calc_overlaps(frames: np.ndarray, crop_top: int, crop_bottom: int, idea_offset: int, sample_cols=None, verbose=False):
+def calc_overlaps(
+        frames: np.ndarray, crop_top: int, crop_bottom: int, expect_offset: int,
+        sample_cols=None, verbose=False, approx_diff=0.2, min_overlap=100
+):
     n = frames.shape[0]
     img = frames[0][0]
     img2 = None
@@ -94,8 +97,8 @@ def calc_overlaps(frames: np.ndarray, crop_top: int, crop_bottom: int, idea_offs
         img2 = frames[i][0]
         cols2 = col_sampling(img2[crop_top: -crop_bottom], sample_cols)
 
-        step, p = predict(results[-3:], idea_offset)
-        offset, diff = diff_overlap(cols, cols2, p)
+        step, p = predict(results[-3:], expect_offset)
+        offset, diff = diff_overlap(cols, cols2, p, approx_diff, min_overlap)
         results.append((i, offset, diff))
 
         i += step

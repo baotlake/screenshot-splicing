@@ -1,4 +1,5 @@
 #! python3
+from email.policy import default
 import time
 import click
 import numpy as np
@@ -17,7 +18,8 @@ from util import get_dimension, get_video, save_image
 @click.option('-t', '--transpose', 'transpose', is_flag=True, help='for horizontal scrolling')
 @click.option('--seam-width', 'seam_width', default=0, help='for debugging, show seams, set seam width')
 @click.option('-v', '--verbose', 'verbose', is_flag=True, default=False)
-def run(src, crop_top=0.15, crop_bottom=0.15, expect_offset=0.3, output=None, transpose=False, seam_width=0, verbose=False):
+@click.option('--min-overlap', 'min_overlap', default=0.15)
+def run(src, crop_top=0.15, crop_bottom=0.15, expect_offset=0.3, output=None, transpose=False, seam_width=0, verbose=False, min_overlap=0.15):
     w, h = get_dimension(src)
     if transpose:
         w, h = h, w
@@ -26,6 +28,7 @@ def run(src, crop_top=0.15, crop_bottom=0.15, expect_offset=0.3, output=None, tr
     crop_top = parse_abs(crop_top)
     crop_bottom = parse_abs(crop_bottom)
     expect_offset = parse_abs(expect_offset)
+    min_overlap = parse_abs(min_overlap)
 
     buffer = get_video(src, quiet=not verbose)
     shape = [-1, 3, h, w] if not transpose else [-1, 3, w, h]
@@ -33,7 +36,12 @@ def run(src, crop_top=0.15, crop_bottom=0.15, expect_offset=0.3, output=None, tr
     if transpose:
         video = video.transpose(0, 1, 3, 2)
 
-    results = calc_overlaps(video, crop_top, crop_bottom, expect_offset, None, verbose)
+    sample_cols = None
+
+    results = calc_overlaps(
+        video, crop_top, crop_bottom,
+        expect_offset, sample_cols, verbose, 0.2, min_overlap,
+    )
     panorama = splice(video, results, crop_top, crop_bottom, seam_width)
     if transpose:
         panorama = panorama.transpose(1, 0, 2)
