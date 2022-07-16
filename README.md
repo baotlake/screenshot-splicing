@@ -6,11 +6,9 @@ Python滚动截长图的简单算法实现，由视频读帧计算滚动距离�
 
 ## 安装依赖
 ```shell
-# ffmpeg-python, numpy, pillow
+# ffmpeg-python, numpy, pillow, click
 
-pip install ffmpeg-python
-pip install numpy
-pip install pillow
+pip install numpy pillow ffmpeg-python click
 
 # ffmpeg (https://ffmpeg.org/)
 
@@ -19,8 +17,15 @@ apt install ffmpeg
 
 ## 用法
 ```sh
+./splicing --help
 ./splicing ../examples/a.mp4
 ```
+
+## Jupyter Notebook
+
+[Datalore 在线演示](https://datalore.jetbrains.com/notebook/gsUTxNo1FoaYJjYVp7QWQd/yPRZBJpUVjuA46Amn1pR7S/)
+
+[screen-splicing.ipynb](./screen-splicing.ipynb)
 
 ## ❇️ core
 算法的一些主要函数实现
