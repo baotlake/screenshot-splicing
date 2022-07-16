@@ -12,9 +12,10 @@ def get_dimension(video_path: str):
     return (int(stream['width']), int(stream['height']))
 
 
-def get_video(video_path: str, pix_fmt='yuv444p'):
+def get_video(video_path: str, pix_fmt='yuv444p', quiet=False):
     buffer, err = ffmpeg.input(video_path).output(
-        'pipe:', format='rawvideo', pix_fmt=pix_fmt).run(capture_stdout=True)
+        'pipe:', format='rawvideo', pix_fmt=pix_fmt
+    ).run(capture_stdout=True, quiet=quiet)
 
     return buffer
 
@@ -26,7 +27,7 @@ def save_image(array: np.ndarray, file_path: str, max_height=65000, mode='YCbCr'
     if filename.endswith('.jpg'):
         filename = filename[:-4]
 
-    print(path_dir, filename)
+    # print(path_dir, filename)
 
     for i in range(0, array.shape[0] // max_height + 1):
         part = array[i * max_height: (i+1) * max_height]

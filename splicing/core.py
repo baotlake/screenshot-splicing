@@ -3,16 +3,16 @@ import numpy as np
 
 
 # 列采样函数
-def col_sampling(img_array: np.ndarray, cols_group=None):
+def col_sampling(img_array: np.ndarray, sample_cols=None):
     w = img_array.shape[1]
-    default_group = (
-        np.linspace(20, w/4, 16, dtype='int'),
-        np.linspace(w/2, 5 * w / 8, 16, dtype='int'),
-        np.linspace(6 * w / 8, 7 * w / 8, 16, dtype='int')
-    )
+    default_cols = [
+        np.linspace(20, w/4, 3, dtype='int'),
+        np.linspace(w/2, 5 * w / 8, 3, dtype='int'),
+        np.linspace(6 * w / 8, 7 * w / 8, 3, dtype='int')
+    ]
 
-    cols_group = cols_group or default_group
-    return np.stack(list(np.average(img_array[:, cols], axis=1) for cols in cols_group), axis=1)
+    sample_cols = sample_cols or default_cols
+    return np.stack(list(np.average(img_array[:, cols], axis=1) for cols in sample_cols), axis=1)
 
 
 # 根据预测值,生成一个最佳的偏移序列
@@ -80,11 +80,11 @@ def predict(history: list, idea_offset, max_step=3):
 
 
 # 计算视频邻近帧之间的重合位置
-def calc_overlaps(frames: np.ndarray, crop_top: int, crop_bottom: int, idea_offset: int):
+def calc_overlaps(frames: np.ndarray, crop_top: int, crop_bottom: int, idea_offset: int, sample_cols=None, verbose=False):
     n = frames.shape[0]
     img = frames[0][0]
     img2 = None
-    cols = col_sampling(img[crop_top: -crop_bottom])
+    cols = col_sampling(img[crop_top: -crop_bottom], sample_cols)
     cols2 = None
 
     results = []
@@ -92,7 +92,7 @@ def calc_overlaps(frames: np.ndarray, crop_top: int, crop_bottom: int, idea_offs
 
     while i < n:
         img2 = frames[i][0]
-        cols2 = col_sampling(img2[crop_top: -crop_bottom])
+        cols2 = col_sampling(img2[crop_top: -crop_bottom], sample_cols)
 
         step, p = predict(results[-3:], idea_offset)
         offset, diff = diff_overlap(cols, cols2, p)
@@ -101,12 +101,14 @@ def calc_overlaps(frames: np.ndarray, crop_top: int, crop_bottom: int, idea_offs
         i += step
         cols = cols2
         img = img2
+        if verbose:
+            print(f'diff  {i}\t{offset}\t{p}\t{diff}')
 
     return results
 
 
 # 拼接长图
-def splice(frames: np.ndarray, results: list, crop_top: int, crop_bottom: int):
+def splice(frames: np.ndarray, results: list, crop_top: int, crop_bottom: int, seam_width=0):
     full_h, w = frames[0][0].shape
     h = full_h - crop_top - crop_bottom
 
@@ -136,6 +138,8 @@ def splice(frames: np.ndarray, results: list, crop_top: int, crop_bottom: int):
     for (i, offset, diff) in results:
         y += offset
         image = get_frame(i)[crop_top: -crop_bottom]
+        if seam_width > 0:
+            image[0: seam_width] = [76,  84, 255]
         tamplate[y: y + h] = image
 
     return tamplate
