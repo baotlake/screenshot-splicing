@@ -19,7 +19,8 @@ from util import get_dimension, get_video, save_image
 @click.option('--seam-width', 'seam_width', default=0, help='for debugging, show seams, set seam width')
 @click.option('-v', '--verbose', 'verbose', is_flag=True, default=False)
 @click.option('--min-overlap', 'min_overlap', default=0.15)
-def run(src, crop_top=0.15, crop_bottom=0.15, expect_offset=0.3, output=None, transpose=False, seam_width=0, verbose=False, min_overlap=0.15):
+@click.option('--approx-diff', 'approx_diff', default=1)
+def run(src, crop_top=0.15, crop_bottom=0.15, expect_offset=0.3, output=None, transpose=False, seam_width=0, verbose=False, min_overlap=0.15, approx_diff=1.0):
     w, h = get_dimension(src)
     if transpose:
         w, h = h, w
@@ -40,7 +41,7 @@ def run(src, crop_top=0.15, crop_bottom=0.15, expect_offset=0.3, output=None, tr
 
     results = calc_overlaps(
         video, crop_top, crop_bottom,
-        expect_offset, sample_cols, verbose, 0.2, min_overlap,
+        expect_offset, sample_cols, verbose, approx_diff, min_overlap,
     )
     panorama = splice(video, results, crop_top, crop_bottom, seam_width)
     if transpose:

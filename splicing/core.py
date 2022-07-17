@@ -73,9 +73,9 @@ def predict(history: list, expect_offset, max_step=3):
         else:
             return 1, pre_data[1]
 
-    frame_distance = math.floor(expect_offset / abs(offset_per_frame * 1.5))
-    step = max(min(frame_distance - 1, max_step), 1)
-    predict_y = int((step + 1) * offset_per_frame)
+    frame_distance = math.floor(expect_offset / abs(offset_per_frame * 1))
+    step = max(min(frame_distance, max_step), 1)
+    predict_y = int(step * offset_per_frame)
     return step, predict_y
 
 
